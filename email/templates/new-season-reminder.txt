@@ -1,4 +1,6 @@
-Hi {{.Name}},
+Subject: Glamorgan9 Quay West 2025 bookings are now open
+
+Hi {{.FirstName}},
 
 Just a reminder that we are here, and if you would like to rebook, let me know.
 
