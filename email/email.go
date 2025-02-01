@@ -19,7 +19,7 @@ const (
 
 type Contact struct {
 	Name      string
-	BookAgain string
+	BookAgain bool
 	Email     string
 }
 
@@ -58,9 +58,9 @@ func main() {
 			continue
 		}
 
-		contact := &Contact{record[0], record[1], record[2]}
+		contact := toContact(record)
 
-		if contact.BookAgain != "NO" {
+		if contact.BookAgain {
 			err = tmpl.Execute(os.Stdout, &contact)
 			check(err)
 		} else {
@@ -68,6 +68,15 @@ func main() {
 		}
 	}
 
+}
+
+func toContact(record []string) *Contact {
+	bookAgain := true
+	if record[1] == "NO" {
+		bookAgain = false
+	}
+
+	return &Contact{record[0], bookAgain, record[2]}
 }
 
 func parseArgs() {
