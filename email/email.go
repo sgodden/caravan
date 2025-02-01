@@ -19,9 +19,11 @@ const (
 )
 
 type Contact struct {
-	Name      string
-	BookAgain bool
-	Email     string
+	FirstName            string
+	Surname              string
+	Email                string
+	BookAgain            bool
+	BookedForCurrentYear bool
 }
 
 type SmtpSettings struct {
@@ -52,7 +54,7 @@ func main() {
 	stringData := string(fileData)
 
 	csvReader := csv.NewReader(strings.NewReader(stringData))
-	csvReader.FieldsPerRecord = 3
+	csvReader.FieldsPerRecord = 5
 
 	for {
 		record, err := csvReader.Read()
@@ -62,7 +64,7 @@ func main() {
 		check(err)
 
 		// skip the header
-		if record[0] == "Name" {
+		if record[0] == "First Name" {
 			continue
 		}
 
@@ -71,7 +73,7 @@ func main() {
 		if contact.BookAgain {
 			sendEmail(renderEmailBody(tmpl, contact), contact, smtpSettings)
 		} else {
-			fmt.Println("Skipping: ", contact.Name)
+			fmt.Println("Skipping: ", contact.FirstName)
 		}
 	}
 
@@ -88,11 +90,16 @@ func renderEmailBody(template *template.Template, contact *Contact) string {
 
 func toContact(record []string) *Contact {
 	bookAgain := true
-	if record[1] == "NO" {
+	if record[3] == "NO" {
 		bookAgain = false
 	}
 
-	return &Contact{record[0], bookAgain, record[2]}
+	bookedForCurrentYear := false
+	if record[4] == "YES" {
+		bookedForCurrentYear = true
+	}
+
+	return &Contact{record[0], record[1], record[2], bookAgain, bookedForCurrentYear}
 }
 
 func parseArgs() {
