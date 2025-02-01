@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"encoding/csv"
 	"flag"
 	"fmt"
@@ -61,13 +62,21 @@ func main() {
 		contact := toContact(record)
 
 		if contact.BookAgain {
-			err = tmpl.Execute(os.Stdout, &contact)
-			check(err)
+			sendEmail(renderEmailBody(tmpl, contact), contact)
 		} else {
 			fmt.Println("Skipping: ", contact.Name)
 		}
 	}
 
+}
+
+func renderEmailBody(template *template.Template, contact *Contact) string {
+	var bytes bytes.Buffer
+
+	err := template.Execute(&bytes, contact)
+	check(err)
+
+	return bytes.String()
 }
 
 func toContact(record []string) *Contact {
