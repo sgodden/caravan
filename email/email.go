@@ -4,6 +4,7 @@ import (
 	"encoding/csv"
 	"flag"
 	"fmt"
+	"html/template"
 	"io"
 	"log"
 	"os"
@@ -48,8 +49,7 @@ func main() {
 		}
 		check(err)
 
-		name := record[0]
-		fmt.Println(name)
+		renderTemplate(&Contact{record[0], record[1]})
 
 		// for idx, element := range record {
 		// 	if idx == EMAIL_ADDDRESS && len(element) > 0 {
@@ -74,6 +74,10 @@ func parseArgs() {
 	fmt.Println("template: ", emailTemplate)
 }
 
-func renderTemplate() {
+func renderTemplate(contact *Contact) {
+	tmpl, err := template.New("email").Parse("Hi {{.Name}}\n")
+	check(err)
 
+	err = tmpl.Execute(os.Stdout, contact)
+	check(err)
 }
