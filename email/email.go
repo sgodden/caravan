@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"flag"
 	"fmt"
 	"io"
 	"log"
@@ -15,6 +16,9 @@ const (
 	EMAIL_ADDDRESS = iota
 )
 
+var contactsCsvFile string
+var emailTemplate string
+
 func check(e error) {
 	if e != nil {
 		log.Fatal(e)
@@ -22,6 +26,8 @@ func check(e error) {
 }
 
 func main() {
+	parseArgs()
+
 	fileData, err := os.ReadFile("contacts.csv")
 	check(err)
 
@@ -45,3 +51,21 @@ func main() {
 	}
 
 }
+
+func parseArgs() {
+	flag.StringVar(&contactsCsvFile, "contacts", "", "CSV file holding contact details")
+	flag.StringVar(&emailTemplate, "template", "", "Template to use for generated emails")
+	flag.Parse()
+
+	if contactsCsvFile == "" || emailTemplate == "" {
+		flag.Usage()
+		os.Exit(1)
+	}
+
+	fmt.Println("contacts: ", contactsCsvFile)
+	fmt.Println("template: ", emailTemplate)
+}
+
+// func renderTemplate() {
+
+// }
