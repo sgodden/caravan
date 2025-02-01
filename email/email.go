@@ -24,8 +24,15 @@ type Contact struct {
 	Email     string
 }
 
+type SmtpSettings struct {
+	userId   string
+	password string
+}
+
 var contactsCsvFile string
 var emailTemplate string
+
+var smtpSettings *SmtpSettings
 
 func check(e error) {
 	if e != nil {
@@ -62,7 +69,7 @@ func main() {
 		contact := toContact(record)
 
 		if contact.BookAgain {
-			sendEmail(renderEmailBody(tmpl, contact), contact)
+			sendEmail(renderEmailBody(tmpl, contact), contact, smtpSettings)
 		} else {
 			fmt.Println("Skipping: ", contact.Name)
 		}
@@ -89,12 +96,23 @@ func toContact(record []string) *Contact {
 }
 
 func parseArgs() {
+	var smtpUserId string
+	var smtpPassword string
+
 	flag.StringVar(&contactsCsvFile, "contacts", "", "CSV file holding contact details")
 	flag.StringVar(&emailTemplate, "template", "", "Template to use for generated emails")
+	flag.StringVar(&smtpUserId, "smtp-user-id", "", "User ID for the SMTP server")
+	flag.StringVar(&smtpPassword, "smtp-password", "", "Password for the SMTP server")
 	flag.Parse()
 
-	if contactsCsvFile == "" || emailTemplate == "" {
+	if contactsCsvFile == "" ||
+		emailTemplate == "" ||
+		smtpUserId == "" ||
+		smtpPassword == "" {
+
 		flag.Usage()
 		os.Exit(1)
 	}
+
+	smtpSettings = &SmtpSettings{smtpUserId, smtpPassword}
 }
