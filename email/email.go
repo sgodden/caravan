@@ -16,6 +16,11 @@ const (
 	EMAIL_ADDDRESS = iota
 )
 
+type Contact struct {
+	Name string
+	Email string
+}
+
 var contactsCsvFile string
 var emailTemplate string
 
@@ -43,11 +48,14 @@ func main() {
 		}
 		check(err)
 
-		for idx, element := range record {
-			if idx == EMAIL_ADDDRESS && len(element) > 0 {
-				fmt.Println(element)
-			}
-		}
+		name := record[0]
+		fmt.Println(name)
+
+		// for idx, element := range record {
+		// 	if idx == EMAIL_ADDDRESS && len(element) > 0 {
+		// 		fmt.Println(element)
+		// 	}
+		// }
 	}
 
 }
@@ -66,6 +74,6 @@ func parseArgs() {
 	fmt.Println("template: ", emailTemplate)
 }
 
-// func renderTemplate() {
+func renderTemplate() {
 
-// }
+}
