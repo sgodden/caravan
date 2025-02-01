@@ -1,0 +1,7 @@
+Hi {{.Name}},
+
+Just a reminder that we are here, and if you would like to rebook, let me know.
+
+Best regards,
+
+Simon

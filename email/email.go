@@ -18,8 +18,9 @@ const (
 )
 
 type Contact struct {
-	Name string
-	Email string
+	Name      string
+	BookAgain string
+	Email     string
 }
 
 var contactsCsvFile string
@@ -34,7 +35,10 @@ func check(e error) {
 func main() {
 	parseArgs()
 
-	fileData, err := os.ReadFile("contacts.csv")
+	tmpl, err := template.ParseFiles(emailTemplate)
+	check(err)
+
+	fileData, err := os.ReadFile(contactsCsvFile)
 	check(err)
 
 	stringData := string(fileData)
@@ -49,13 +53,19 @@ func main() {
 		}
 		check(err)
 
-		renderTemplate(&Contact{record[0], record[1]})
+		// skip the header
+		if record[0] == "Name" {
+			continue
+		}
 
-		// for idx, element := range record {
-		// 	if idx == EMAIL_ADDDRESS && len(element) > 0 {
-		// 		fmt.Println(element)
-		// 	}
-		// }
+		contact := &Contact{record[0], record[1], record[2]}
+
+		if contact.BookAgain != "NO" {
+			err = tmpl.Execute(os.Stdout, &contact)
+			check(err)
+		} else {
+			fmt.Println("Skipping: ", contact.Name)
+		}
 	}
 
 }
@@ -69,15 +79,4 @@ func parseArgs() {
 		flag.Usage()
 		os.Exit(1)
 	}
-
-	fmt.Println("contacts: ", contactsCsvFile)
-	fmt.Println("template: ", emailTemplate)
-}
-
-func renderTemplate(contact *Contact) {
-	tmpl, err := template.New("email").Parse("Hi {{.Name}}\n")
-	check(err)
-
-	err = tmpl.Execute(os.Stdout, contact)
-	check(err)
 }
