@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/csv"
 	"flag"
-	"fmt"
 	"html/template"
 	"io"
 	"log"
@@ -33,6 +32,7 @@ type SmtpSettings struct {
 
 var contactsCsvFile string
 var emailTemplate string
+var dryRun bool
 
 var smtpSettings *SmtpSettings
 
@@ -48,6 +48,16 @@ func main() {
 	tmpl, err := template.ParseFiles(emailTemplate)
 	check(err)
 
+	contacts := readContacts()
+
+	for _, contact := range *contacts {
+		if contact.BookAgain && !contact.BookedForCurrentYear {
+			sendEmail(renderEmailBody(tmpl, &contact), &contact, smtpSettings, dryRun)
+		}
+	}
+}
+
+func readContacts() *[]Contact {
 	fileData, err := os.ReadFile(contactsCsvFile)
 	check(err)
 
@@ -55,6 +65,8 @@ func main() {
 
 	csvReader := csv.NewReader(strings.NewReader(stringData))
 	csvReader.FieldsPerRecord = 5
+
+	var contacts []Contact
 
 	for {
 		record, err := csvReader.Read()
@@ -69,14 +81,10 @@ func main() {
 		}
 
 		contact := toContact(record)
-
-		if contact.BookAgain {
-			sendEmail(renderEmailBody(tmpl, contact), contact, smtpSettings)
-		} else {
-			fmt.Println("Skipping: ", contact.FirstName)
-		}
+		contacts = append(contacts, *contact)
 	}
 
+	return &contacts
 }
 
 func renderEmailBody(template *template.Template, contact *Contact) string {
@@ -110,6 +118,7 @@ func parseArgs() {
 	flag.StringVar(&emailTemplate, "template", "", "Template to use for generated emails")
 	flag.StringVar(&smtpUserId, "smtp-user-id", "", "User ID for the SMTP server")
 	flag.StringVar(&smtpPassword, "smtp-password", "", "Password for the SMTP server")
+	flag.BoolVar(&dryRun, "dry-run", true, "Dry run - do not send any emails (defaults to true)")
 	flag.Parse()
 
 	if contactsCsvFile == "" ||
