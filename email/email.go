@@ -11,12 +11,6 @@ import (
 	"strings"
 )
 
-const (
-	NAME           = iota
-	BOOK_AGAIN     = iota
-	EMAIL_ADDDRESS = iota
-)
-
 type Contact struct {
 	FirstName            string
 	Surname              string
